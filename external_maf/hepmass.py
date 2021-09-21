@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from os.path import join
 
-import datasets
-import util
+from . import datasets
+from . import util
 
 
 class HEPMASS:
@@ -88,7 +88,7 @@ def load_data_no_discrete_normalised_as_array(path):
     features_to_remove = []
     for feature in data_train.T:
         c = Counter(feature)
-        max_count = np.array([v for k, v in sorted(c.iteritems())])[0]
+        max_count = np.array([v for k, v in sorted(c.items())])[0]
         if max_count > 5:
             features_to_remove.append(i)
         i += 1

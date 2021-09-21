@@ -61,8 +61,8 @@ class model_1d(object):
             self.optim.step()
             
             if ((it + 1) % 1000) == 0:
-                print 'Iteration: [%4d/%4d] loss: %.8f' % \
-                    (it+1, total, loss.data[0])
+                print('Iteration: [%4d/%4d] loss: %.8f' % \
+                    (it+1, total, loss.data[0]))
              
 
 

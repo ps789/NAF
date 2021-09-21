@@ -243,12 +243,12 @@ class model(object):
                 self.vae.optim.swap()
                 loss_val = self.evaluate(self.valid_loader, 1)
                 loss_tst = self.evaluate(self.test_loader, 1)       
-                print 'Epoch: [%4d/%4d] train <= %.2f %.2f %.2f ' \
+                print('Epoch: [%4d/%4d] train <= %.2f %.2f %.2f ' \
                       'valid: %.3f test: %.3f' % \
                 (e+1, epoch, LOSSES/float(counter), 
                  RECS/float(counter), KLS/float(counter),
                  loss_val,
-                 loss_tst), weight
+                 loss_tst), weight)
                 if loss_val < best_val:
                     print(' [^] Best validation loss [^] ... [saving]')
                     self.save(self.save_dir+'/'+self.filename+'_best')
@@ -386,8 +386,8 @@ def main():
     torch.manual_seed(args.seed+10000)
 
     fn = str(time.time()).replace('.','')
-    print args
-    print fn
+    print(args)
+    print(fn)
 
     print(" [*] Building model!")    
     old_fn = args.save_dir+'/'+args.fn+'_args.txt'
@@ -398,7 +398,7 @@ def main():
                          ['to_train','epoch','anneal'])
         args.__dict__.update(d)
         print(" New args:" )
-        print args
+        print(args)
         mdl = model(args, fn)
         print(" [*] Loading model!")
         mdl.load(args.save_dir+'/'+args.fn)
@@ -411,8 +411,8 @@ def main():
         mdl.train(args.epoch, args.anneal)
         print(" [*] Training finished!")
 
-    print " [**] Valid: %.4f" % mdl.evaluate(mdl.valid_loader, 2000)
-    print " [**] Test: %.4f" % mdl.evaluate(mdl.test_loader, 2000)
+    print(" [**] Valid: %.4f" % mdl.evaluate(mdl.valid_loader, 2000))
+    print(" [**] Test: %.4f" % mdl.evaluate(mdl.test_loader, 2000))
 
     print(" [*] Testing finished!")
 

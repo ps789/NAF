@@ -8,8 +8,8 @@ LSUN
 https://github.com/fyu/lsun
 """
 
-import urllib
-import cPickle as pickle
+import urllib.request, urllib.parse, urllib.error
+import pickle as pickle
 import os
 import struct
 import numpy as np
@@ -159,7 +159,7 @@ def get_file(fname, origin, untar=False):
         fpath = os.path.join(datadir, fname)
 
     if not os.path.exists(fpath):
-        print('Downloading data from',  origin)
+        print(('Downloading data from',  origin))
         global progbar
         progbar = None
 
@@ -190,7 +190,7 @@ def load_batch(fpath, label_key='labels'):
     else:
         d = pickle.load(f, encoding="bytes")
         # decode utf8
-        for k, v in d.items():
+        for k, v in list(d.items()):
             del(d[k])
             d[k.decode("utf8")] = v
     f.close()
@@ -204,7 +204,7 @@ def load_cifar10():
     dirname = "cifar-10-batches-py"
     origin = "http://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
     path = get_file(dirname, origin=origin, untar=True)
-    print path
+    print(path)
     nb_train_samples = 50000
 
     X_train = np.zeros((nb_train_samples, 3, 32, 32), dtype="uint8")
@@ -212,7 +212,7 @@ def load_cifar10():
 
     for i in range(1, 6):
         fpath = os.path.join(path, 'data_batch_' + str(i))
-        print fpath
+        print(fpath)
         data, labels = load_batch(fpath)
         X_train[(i-1)*10000:i*10000, :, :, :] = data
         y_train[(i-1)*10000:i*10000] = labels
@@ -233,12 +233,12 @@ if __name__ == '__main__':
     
     
     if mnist:
-        print 'dynamically binarized mnist'
+        print('dynamically binarized mnist')
         mnist_filenames = ['train-images-idx3-ubyte', 't10k-images-idx3-ubyte']
         
         for filename in mnist_filenames:
             local_filename = os.path.join(savedir, filename)
-            urllib.urlretrieve("http://yann.lecun.com/exdb/mnist/{}.gz".format(filename), local_filename+'.gz')
+            urllib.request.urlretrieve("http://yann.lecun.com/exdb/mnist/{}.gz".format(filename), local_filename+'.gz')
             with gzip.open(local_filename+'.gz', 'rb') as f:
                 file_content = f.read()
             with open(local_filename, 'wb') as f:
@@ -246,13 +246,13 @@ if __name__ == '__main__':
             np.savetxt(local_filename,load_mnist_images_np(local_filename))
             os.remove(local_filename+'.gz')
 
-        print 'statically binarized mnist'
+        print('statically binarized mnist')
         subdatasets = ['train', 'valid', 'test']
         for subdataset in subdatasets:
             filename = 'binarized_mnist_{}.amat'.format(subdataset)
             url = 'http://www.cs.toronto.edu/~larocheh/public/datasets/binarized_mnist/binarized_mnist_{}.amat'.format(subdataset)
             local_filename = os.path.join(savedir, filename)
-            urllib.urlretrieve(url, local_filename)
+            urllib.request.urlretrieve(url, local_filename)
         
     if cifar10:
         (X_train, y_train), (X_test, y_test) = load_cifar10()
@@ -264,13 +264,13 @@ if __name__ == '__main__':
         url = 'https://github.com/yburda/iwae/raw/master/datasets/OMNIGLOT/chardata.mat'
         filename = 'omniglot.amat'
         local_filename = os.path.join(savedir, filename)
-        urllib.urlretrieve(url, local_filename)
+        urllib.request.urlretrieve(url, local_filename)
         
     if maf:
         savedir = 'external_maf/datasets'
         url = 'https://zenodo.org/record/1161203/files/data.tar.gz'
         local_filename = os.path.join(savedir, 'data.tar.gz')
-        urllib.urlretrieve(url, local_filename)
+        urllib.request.urlretrieve(url, local_filename)
         
         tar = tarfile.open(local_filename, "r:gz")
         tar.extractall(savedir)

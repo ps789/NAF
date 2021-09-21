@@ -199,11 +199,11 @@ class model(object):
                 optim.swap()
                 loss_val = self.evaluate(self.valid_loader)
                 loss_tst = self.evaluate(self.test_loader)       
-                print 'Epoch: [%4d/%4d] train <= %.2f ' \
+                print('Epoch: [%4d/%4d] train <= %.2f ' \
                       'valid: %.3f test: %.3f' % \
                 (self.checkpoint['e']+1, epoch, LOSSES/float(counter), 
                  loss_val,
-                 loss_tst)
+                 loss_tst))
                 if loss_val < self.checkpoint['best_val']:
                     print(' [^] Best validation loss [^] ... [saving]')
                     self.save(self.save_dir+'/'+self.filename+'_best')
@@ -219,7 +219,7 @@ class model(object):
                 self.save(self.save_dir+'/'+self.filename+'_last')
             
             if self.impatient():
-                print 'Terminating due to impatience ... \n'
+                print('Terminating due to impatience ... \n')
                 break 
             
         # loading best valid model (early stopping)
@@ -377,8 +377,8 @@ def main():
 
     #fn = str(time.time()).replace('.','')
     fn = args2fn(args)
-    print args
-    print '\nfilename: ', fn
+    print(args)
+    print('\nfilename: ', fn)
 
     print(" [*] Building model!")    
     if args.fn != '0':
@@ -386,13 +386,13 @@ def main():
         # args.fn ends with ``_last'' or ``_best''
         old_fn = args.fn
         overwrite_args = True
-        print 'MANUALLY RESUMING'
+        print('MANUALLY RESUMING')
     else:
         # automatic resuming the last model
         # (of the same args) if it exists
         old_fn = fn + '_last'
         overwrite_args = False
-        print 'AUTOMATICALLY RESUMING'
+        print('AUTOMATICALLY RESUMING')
         
     old_args = args.save_dir+'/'+old_fn+'_args.txt'
     old_path = args.save_dir+'/'+old_fn
@@ -405,8 +405,8 @@ def main():
         if overwrite_args:
             fn = args2fn(args)
         print(" New args:" )
-        print args
-        print '\nfilename: ', fn
+        print(args)
+        print('\nfilename: ', fn)
         mdl = model(args, fn)
         print(" [*] Loading model!")
         mdl.resume(old_path)
@@ -419,8 +419,8 @@ def main():
         mdl.train(args.epoch)
         print(" [*] Training finished!")
 
-    print " [**] Valid: %.4f" % mdl.evaluate(mdl.valid_loader)
-    print " [**] Test: %.4f" % mdl.evaluate(mdl.test_loader)
+    print(" [**] Valid: %.4f" % mdl.evaluate(mdl.valid_loader))
+    print(" [**] Test: %.4f" % mdl.evaluate(mdl.test_loader))
 
     print(" [*] Testing finished!")
 
