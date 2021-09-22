@@ -75,4 +75,3 @@ class BSDS300:
         util.disp_imdata(images, self.image_size, [6, 10])
 
         plt.show()
-

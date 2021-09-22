@@ -18,9 +18,9 @@ import time
 
 
 savedir = 'dataset/'
-mnist = False
-cifar10 = False
-omniglot = False
+mnist = True
+cifar10 = True
+omniglot = True
 maf = True
 
 
@@ -121,7 +121,7 @@ class Progbar(object):
 
     def add(self, n, values=[]):
         self.update(self.seen_so_far+n, values)
-        
+
 # mnist
 def load_mnist_images_np(imgs_filename):
     with open(imgs_filename, 'rb') as f:
@@ -199,7 +199,7 @@ def load_batch(fpath, label_key='labels'):
 
     data = data.reshape(data.shape[0], 3, 32, 32)
     return data, labels
-    
+
 def load_cifar10():
     dirname = "cifar-10-batches-py"
     origin = "http://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
@@ -230,12 +230,12 @@ if __name__ == '__main__':
 
     if not os.path.exists(savedir):
         os.makedirs(savedir)
-    
-    
+
+
     if mnist:
         print('dynamically binarized mnist')
         mnist_filenames = ['train-images-idx3-ubyte', 't10k-images-idx3-ubyte']
-        
+
         for filename in mnist_filenames:
             local_filename = os.path.join(savedir, filename)
             urllib.request.urlretrieve("http://yann.lecun.com/exdb/mnist/{}.gz".format(filename), local_filename+'.gz')
@@ -253,27 +253,26 @@ if __name__ == '__main__':
             url = 'http://www.cs.toronto.edu/~larocheh/public/datasets/binarized_mnist/binarized_mnist_{}.amat'.format(subdataset)
             local_filename = os.path.join(savedir, filename)
             urllib.request.urlretrieve(url, local_filename)
-        
+
     if cifar10:
         (X_train, y_train), (X_test, y_test) = load_cifar10()
         pickle.dump((X_train,y_train,X_test,y_test),
                     open('{}/cifar10.pkl'.format(savedir),'w'))
-    
-    
+
+
     if omniglot:
         url = 'https://github.com/yburda/iwae/raw/master/datasets/OMNIGLOT/chardata.mat'
         filename = 'omniglot.amat'
         local_filename = os.path.join(savedir, filename)
         urllib.request.urlretrieve(url, local_filename)
-        
+
     if maf:
         savedir = 'external_maf/datasets'
         url = 'https://zenodo.org/record/1161203/files/data.tar.gz'
         local_filename = os.path.join(savedir, 'data.tar.gz')
         urllib.request.urlretrieve(url, local_filename)
-        
+
         tar = tarfile.open(local_filename, "r:gz")
         tar.extractall(savedir)
         tar.close()
         os.remove(local_filename)
-        
