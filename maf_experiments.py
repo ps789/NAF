@@ -60,11 +60,14 @@ class MAF(object):
             flow = lambda **kwargs:flows.IAF_DDSF_Quantile(num_ds_dim=num_ds_dim,
                      num_ds_layers=num_ds_layers,
                      **kwargs)
+            flow2 = lambda **kwargs:flows.IAF_DDSF_Quantile_Early_Layers(num_ds_dim=num_ds_dim,
+                     num_ds_layers=num_ds_layers,
+                     **kwargs)
         elif self.flowtype == 'affine_quantile':
             flow = flows.IAF_Quantile
             flow2 = flows.IAF_Quantile_Early_Layers
 
-        if self.flowtype == 'affine_quantile':
+        if self.flowtype == 'affine_quantile' or self.flowtype == 'ddsf_quantile':
             if num_flow_layers > 1:
                 sequels = [nn_.SequentialFlow(
                     flow2(dim=dim,
@@ -122,7 +125,7 @@ class MAF(object):
         return - losses
 
     def loss(self, x):
-        if self.flowtype == 'affine_quantile':
+        if self.flowtype == 'affine_quantile' or self.flowtype == 'ddsf_quantile':
             return self.quantileLoss(x)
         return - self.density(x)
     def quantileLoss(self, spl):
