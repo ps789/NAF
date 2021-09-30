@@ -73,7 +73,7 @@ class MAF(object):
                          num_layers=args.num_hid_layers+1,
                          activation=act,
                          fixed_order=fixed_order)) for i in range(num_flow_layers-1)] + \
-                         [flow2(dim=dim,
+                         [flow(dim=dim,
                                   hid_dim=dimh,
                                   context_dim=dimc,
                                   num_layers=args.num_hid_layers+1,
