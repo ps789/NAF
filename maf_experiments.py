@@ -62,16 +62,31 @@ class MAF(object):
                      **kwargs)
         elif self.flowtype == 'affine_quantile':
             flow = flows.IAF_Quantile
+            flow2 = flows.IAF_Quantile_Early_Layers
 
         if self.flowtype == 'affine_quantile':
-            sequels = [nn_.SequentialFlow(
-                flow(dim=dim,
-                     hid_dim=dimh,
-                     context_dim=dimc,
-                     num_layers=args.num_hid_layers+1,
-                     activation=act,
-                     fixed_order=fixed_order)) for i in range(num_flow_layers)] + \
-                      [flows.LinearFlow_Quantile(dim, dimc),]
+            if num_flow_layers > 1:
+                sequels = [nn_.SequentialFlow(
+                    flow2(dim=dim,
+                         hid_dim=dimh,
+                         context_dim=dimc,
+                         num_layers=args.num_hid_layers+1,
+                         activation=act,
+                         fixed_order=fixed_order)) for i in range(num_flow_layers-1)] + \
+                         [flow2(dim=dim,
+                                  hid_dim=dimh,
+                                  context_dim=dimc,
+                                  num_layers=args.num_hid_layers+1,
+                                  activation=act,
+                                  fixed_order=fixed_order)]
+            else:
+                sequels = [nn_.SequentialFlow(
+                    flow(dim=dim,
+                         hid_dim=dimh,
+                         context_dim=dimc,
+                         num_layers=args.num_hid_layers+1,
+                         activation=act,
+                         fixed_order=fixed_order)) for i in range(num_flow_layers)]
         else:
             sequels = [nn_.SequentialFlow(
                 flow(dim=dim,
@@ -116,12 +131,13 @@ class MAF(object):
         lgd = Variable(torch.FloatTensor(n).zero_())
         zeros = Variable(torch.FloatTensor(n, self.p).zero_())
         alphas = torch.rand_like(spl)
+        alphas = torch.clip(alphas, 1e-2, 1.-1e-2)
         if self.cuda:
             context = context.cuda()
             lgd = lgd.cuda()
             zeros = zeros.cuda()
             alphas = alphas.cuda()
-        z, logdet, _ = self.flow((spl, lgd, context, alphas))
+        z, logdet, _, alphas = self.flow((spl, lgd, context, alphas))
         errors = spl-z
         losses = torch.max((alphas-1) * errors, alphas * errors).sum(dim=1)
         return losses
@@ -211,7 +227,6 @@ class model(object):
                     x = x.cuda()
 
                 losses = self.maf.loss(x)
-
                 loss = losses.mean()
                 LOSSES += losses.sum().data.cpu().numpy()
                 counter += losses.size(0)
