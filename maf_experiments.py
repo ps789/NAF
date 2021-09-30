@@ -61,9 +61,7 @@ class MAF(object):
                      num_ds_layers=num_ds_layers,
                      **kwargs)
         elif self.flowtype == 'affine_quantile':
-            flow = lambda **kwargs:flows.IAF_Quantile(num_ds_dim=num_ds_dim,
-                     num_ds_layers=num_ds_layers,
-                     **kwargs)
+            flow = flows.IAF_Quantile
 
         if self.flowtype == 'affine_quantile':
             sequels = [nn_.SequentialFlow(
@@ -73,7 +71,7 @@ class MAF(object):
                      num_layers=args.num_hid_layers+1,
                      activation=act,
                      fixed_order=fixed_order)) for i in range(num_flow_layers)] + \
-                      [flows.LinearFlow(dim, dimc),]
+                      [flows.LinearFlow_Quantile(dim, dimc),]
         else:
             sequels = [nn_.SequentialFlow(
                 flow(dim=dim,
@@ -110,21 +108,23 @@ class MAF(object):
 
     def loss(self, x):
         if self.flowtype == 'affine_quantile':
-            return self.quantileLoss(x, alphas)
+            return self.quantileLoss(x)
         return - self.density(x)
-    def quantileLoss(self, spl, alphas):
+    def quantileLoss(self, spl):
         n = spl.size(0)
         context = Variable(torch.FloatTensor(n, 1).zero_())
         lgd = Variable(torch.FloatTensor(n).zero_())
         zeros = Variable(torch.FloatTensor(n, self.p).zero_())
-        alphas = torch.randn_like(spl)
+        alphas = torch.rand_like(spl)
         if self.cuda:
             context = context.cuda()
             lgd = lgd.cuda()
             zeros = zeros.cuda()
+            alphas = alphas.cuda()
         z, logdet, _ = self.flow((spl, lgd, context, alphas))
-        errors = x-z
-        losses = torch.max((alphas-1) * errors, alphas * errors)
+        errors = spl-z
+        losses = torch.max((alphas-1) * errors, alphas * errors).sum(dim=1)
+        return losses
     def state_dict(self):
         return self.flow.state_dict()
 
@@ -213,7 +213,6 @@ class model(object):
                 losses = self.maf.loss(x)
 
                 loss = losses.mean()
-
                 LOSSES += losses.sum().data.cpu().numpy()
                 counter += losses.size(0)
 
@@ -225,7 +224,7 @@ class model(object):
 
 
             if self.checkpoint['e']%1 == 0:
-                optim.swap()
+                # optim.swap()
                 loss_val = self.evaluate(self.valid_loader)
                 loss_tst = self.evaluate(self.test_loader)
                 print('Epoch: [%4d/%4d] train <= %.2f ' \
@@ -241,7 +240,7 @@ class model(object):
 
                 LOSSES = 0
                 counter = 0
-                optim.swap()
+                # optim.swap()
 
             self.checkpoint['e'] += 1
             if (self.checkpoint['e'])%5 == 0:
